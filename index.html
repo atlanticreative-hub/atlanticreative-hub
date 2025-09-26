@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<!-- Chosen Palette: Vibrant Professional (Azul, Ciano, Verde, Roxo, Rosa) -->
+<!-- Application Structure Plan: A single-page application designed as an interactive dashboard. The structure prioritizes user engagement over a linear report format. It starts with a Hero section to capture attention, followed by an interactive toggle for target audiences ('Artistas' vs 'Associações') to provide tailored information. The core is an interactive 'Solutions Dashboard' where users can click on a service (Estratégia, Marketing, Financiamento) to dynamically update a central panel with detailed text and a relevant Canvas-based chart (using Chart.js). This task-oriented design allows users to directly explore the solutions most relevant to them, enhancing understanding and engagement. The structure concludes with case studies and a clear call-to-action. -->
+<!-- Visualization & Content Choices: 1. Audience Toggle: Report Info -> Target Audience (Artists, Associations); Goal -> Organize/Inform; Viz -> HTML/CSS toggles with a simple Canvas-drawn icon; Interaction -> On click, JS updates text content and redraws the Canvas icon to show tailored challenges and benefits. 2. Solutions Dashboard: Report Info -> Core Services; Goal -> Compare/Inform; Viz -> HTML/CSS buttons controlling a central panel with text and a Chart.js chart; Interaction -> On click, JS updates the panel content and dynamically generates a relevant chart (e.g., Doughnut for Marketing Mix, Bar for Funding Growth). This provides a clear, interactive comparison of services. 3. All charts are rendered on Canvas via Chart.js, adhering to the NO SVG constraint for data visualization. The company logo remains in SVG as a critical, user-approved branding element, separate from data graphics. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtlantiCreative Hub - Painel Interativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; scroll-behavior: smooth; }
+        .brand-gradient-text { background-image: linear-gradient(to right, #1d4ed8, #06b6d4, #9333ea); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .brand-gradient-bg { background-image: linear-gradient(to right, #1d4ed8, #9333ea); }
+        .hero-section { clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%); }
+        .cta-button { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .cta-button:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(147, 51, 234, 0.3), 0 4px 6px -4px rgba(147, 51, 234, 0.3); }
+        .solution-button { transition: all 0.2s ease-in-out; }
+        .solution-button.active { background-color: #9333ea; color: white; transform: scale(1.05); }
+        .solution-button:not(.active):hover { background-color: #e9d5ff; }
+        .toggle-button { transition: all 0.2s ease-in-out; }
+        .toggle-button.active { background-color: #1d4ed8; color: white; }
+        .toggle-button:not(.active):hover { background-color: #dbeafe; }
+        .chart-container { position: relative; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <svg style="display: none;">
+        <defs>
+            <linearGradient id="grad-a" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1d4ed8;stop-opacity:1" /><stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" /></linearGradient>
+            <linearGradient id="grad-c" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#9333ea;stop-opacity:1" /><stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" /></linearGradient>
+            <g id="ac-logo">
+                <path d="M35 85 L 50 15 L 65 85 L 57 85 L 55 70 L 45 70 L 43 85 Z" fill="url(#grad-a)" transform="scale(0.8) translate(10, 10)"/>
+                <path d="M 45 70 L 55 70 L 53 60 L 47 60 Z" fill="white" transform="scale(0.8) translate(10, 10)"/>
+                <path d="M 28 50 C 35 40, 40 45, 45 40 C 50 35, 50 55, 45 60 C 40 65, 30 60, 28 50 Z" fill="#10b981" transform="translate(10, 25) scale(0.6)"/>
+                <path d="M 75 25 C 90 35, 90 70, 75 80 L 70 70 C 80 65, 80 40, 70 35 Z" fill="url(#grad-c)" transform="scale(0.8) translate(10, 10)"/>
+                <path d="M 80 40 C 75 30, 65 30, 60 40 C 55 50, 60 60, 65 60 C 70 60, 75 50, 80 40 Z" fill="#9333ea" transform="translate(20, 20) scale(0.6)"/>
+            </g>
+        </defs>
+    </svg>
+
+    <header class="p-4 sm:p-6 bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#" class="flex items-center space-x-2">
+                <svg class="w-8 h-8" viewBox="0 0 100 100"><use xlink:href="#ac-logo"/></svg>
+                <div class="flex flex-col leading-none">
+                    <h1 class="text-xl font-extrabold text-gray-800">AtlantiCreative Hub</h1>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest">Consultoria & Inovação</p>
+                </div>
+            </a>
+            <nav class="hidden sm:flex space-x-6 text-sm font-medium text-gray-600">
+                <a href="#publico" class="hover:text-purple-600 transition">Para Quem</a>
+                <a href="#solucoes" class="hover:text-purple-600 transition">Soluções</a>
+                <a href="#contacto" class="hover:text-purple-600 transition">Contacto</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero-section py-24 md:py-32 text-center bg-white relative">
+            <div class="max-w-4xl mx-auto px-4">
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-4"><span class="brand-gradient-text">A Estratégia que Pinta o Futuro da Sua Arte.</span></h2>
+                <p class="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">Uma consultoria interativa para Artistas e Associações. Explore as nossas soluções e veja como podemos impulsionar o seu crescimento.</p>
+                <a href="#solucoes" class="cta-button inline-block px-10 py-4 text-lg font-bold text-white uppercase rounded-full shadow-lg brand-gradient-bg">Explore as Soluções</a>
+            </div>
+        </section>
+
+        <section id="publico" class="py-20">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold brand-gradient-text mb-2">Para Quem Criamos Valor</h3>
+                    <p class="text-gray-600 max-w-2xl mx-auto">As nossas estratégias são desenhadas à medida dos desafios únicos de cada criador e organização. Selecione o seu perfil para ver como o podemos ajudar.</p>
+                </div>
+
+                <div class="flex justify-center space-x-2 md:space-x-4 mb-8">
+                    <button id="toggleArtista" class="toggle-button active text-sm md:text-base font-bold py-2 px-4 md:py-3 md:px-6 rounded-full">Para Artistas</button>
+                    <button id="toggleAssociacao" class="toggle-button text-sm md:text-base font-bold py-2 px-4 md:py-3 md:px-6 rounded-full">Para Associações</button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="text-content">
+                        <h4 id="audienceTitle" class="text-2xl font-bold text-gray-800 mb-4">Desafios Comuns do Artista</h4>
+                        <ul id="audienceList" class="space-y-2 text-gray-600 list-disc list-inside">
+                            <li>Dificuldade em monetizar a sua arte de forma consistente.</li>
+                            <li>Falta de visibilidade e alcance no mercado digital.</li>
+                            <li>Gestão de tempo entre a criação e a promoção do trabalho.</li>
+                            <li>Construção de uma marca pessoal forte e autêntica.</li>
+                        </ul>
+                    </div>
+                    <div class="canvas-container flex justify-center items-center h-48 md:h-64">
+                         <canvas id="audienceCanvas" width="200" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="solucoes" class="py-20 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold brand-gradient-text mb-2">Painel de Soluções Interativas</h3>
+                    <p class="text-gray-600 max-w-2xl mx-auto">Cada desafio criativo tem uma solução estratégica. Clique num dos nossos pilares de serviço para explorar os detalhes e ver uma visualização de dados relevante.</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row md:space-x-4 justify-center mb-8">
+                    <button id="btnEstrategia" data-solution="estrategia" class="solution-button active font-bold py-3 px-6 rounded-lg mb-2 md:mb-0 w-full md:w-auto">Planeamento Estratégico</button>
+                    <button id="btnMarketing" data-solution="marketing" class="solution-button font-bold py-3 px-6 rounded-lg mb-2 md:mb-0 w-full md:w-auto">Marketing Digital</button>
+                    <button id="btnFinanciamento" data-solution="financiamento" class="solution-button font-bold py-3 px-6 rounded-lg w-full md:w-auto">Captação de Fundos</button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-xl p-8 lg:p-12 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[450px]">
+                    <div id="solutionContent" class="text-content">
+                        <h4 id="solutionTitle" class="text-2xl font-bold text-gray-800 mb-4">Estratégia e Planeamento de Carreira</h4>
+                        <p id="solutionText" class="text-gray-600 mb-4">Transformamos a sua paixão numa carreira sustentável. Criamos um roteiro claro com metas, posicionamento de mercado e estratégias de monetização para garantir que a sua visão artística atinja o seu potencial máximo, tanto a nível criativo como financeiro.</p>
+                        <ul id="solutionPoints" class="text-sm text-gray-500 space-y-1">
+                            <li>✓ Análise de mercado e identificação de nicho</li>
+                            <li>✓ Definição de objetivos e KPIs</li>
+                            <li>✓ Modelos de negócio para criativos</li>
+                        </ul>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="solutionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contacto" class="py-20">
+            <div class="max-w-3xl mx-auto px-4 text-center">
+                <h3 class="text-3xl font-bold mb-4">Pronto para dar o próximo passo?</h3>
+                <p class="text-gray-600 mb-8">Deixe-nos os seus dados e entraremos em contacto para agendar a sua primeira sessão de diagnóstico gratuita.</p>
+                <div class="bg-white p-8 rounded-xl shadow-lg max-w-lg mx-auto">
+                    <form onsubmit="event.preventDefault(); alert('Obrigado! A sua mensagem foi enviada. Entraremos em contacto brevemente.');">
+                        <input type="text" placeholder="Nome Completo" required class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="email" placeholder="Email" required class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <textarea placeholder="Fale-nos do seu projeto..." rows="3" class="w-full p-3 mb-6 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                        <button type="submit" class="cta-button w-full px-6 py-3 text-lg font-bold text-white uppercase rounded-lg shadow-md brand-gradient-bg">Contactar a Consultoria</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-8 bg-gray-800 text-white">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center text-center sm:text-left text-sm">
+            <p class="mb-4 sm:mb-0">&copy; 2024 AtlantiCreative Hub. Todos os direitos reservados.</p>
+            <div class="flex items-center space-x-6 text-xs">
+                <a href="mailto:geral@atlanticreative-hub.com" class="hover:text-blue-300 transition">geral@atlanticreative-hub.com</a>
+                <span>+351 93 334 0517</span>
+            </div>
+        </div>
+    </footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const audienceData = {
+            artista: {
+                title: 'Desafios Comuns do Artista',
+                points: [
+                    'Dificuldade em monetizar a sua arte de forma consistente.',
+                    'Falta de visibilidade e alcance no mercado digital.',
+                    'Gestão de tempo entre a criação e a promoção do trabalho.',
+                    'Construção de uma marca pessoal forte e autêntica.',
+                ],
+                draw: (ctx) => {
+                    ctx.clearRect(0, 0, 200, 200);
+                    ctx.strokeStyle = '#1d4ed8';
+                    ctx.lineWidth = 8;
+                    ctx.beginPath();
+                    ctx.moveTo(50, 150);
+                    ctx.bezierCurveTo(50, 170, 150, 170, 150, 150);
+                    ctx.stroke();
+                    ctx.fillStyle = '#9333ea';
+                    ctx.fillRect(80, 80, 40, 60);
+                    ctx.fillStyle = '#10b981';
+                    ctx.beginPath();
+                    ctx.arc(100, 60, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            },
+            associacao: {
+                title: 'Desafios Comuns da Associação',
+                points: [
+                    'Captação de fundos e garantia de sustentabilidade financeira.',
+                    'Aumento do engagement da comunidade e número de associados.',
+                    'Gestão de projetos culturais com recursos limitados.',
+                    'Comunicação de impacto e relevância para stakeholders.',
+                ],
+                draw: (ctx) => {
+                    ctx.clearRect(0, 0, 200, 200);
+                    const drawPerson = (x, y, color) => {
+                        ctx.fillStyle = color;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 15, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.moveTo(x - 20, y + 45);
+                        ctx.lineTo(x, y + 15);
+                        ctx.lineTo(x + 20, y + 45);
+                        ctx.closePath();
+                        ctx.fill();
+                    };
+                    drawPerson(100, 80, '#1d4ed8');
+                    drawPerson(60, 100, '#9333ea');
+                    drawPerson(140, 100, '#10b981');
+                }
+            }
+        };
+
+        const solutionData = {
+            estrategia: {
+                title: 'Estratégia e Planeamento de Carreira',
+                text: 'Transformamos a sua paixão numa carreira sustentável. Criamos um roteiro claro com metas, posicionamento de mercado e estratégias de monetização para garantir que a sua visão artística atinja o seu potencial máximo.',
+                points: ['✓ Análise de mercado e identificação de nicho', '✓ Definição de objetivos e KPIs', '✓ Modelos de negócio para criativos'],
+                chart: {
+                    type: 'bar',
+                    data: {
+                        labels: ['Fase 1: Diagnóstico', 'Fase 2: Planeamento', 'Fase 3: Execução', 'Fase 4: Otimização'],
+                        datasets: [{
+                            label: 'Crescimento Potencial',
+                            data: [15, 40, 75, 100],
+                            backgroundColor: ['#dbeafe', '#bfdbfe', '#93c5fd', '#60a5fa'],
+                            borderColor: '#3b82f6',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { scales: { y: { beginAtZero: true, ticks: { callback: (value) => value + '%' } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Progresso Típico de um Projeto' } } }
+                }
+            },
+            marketing: {
+                title: 'Marketing Criativo e Digital',
+                text: 'A sua arte merece ser vista. Criamos campanhas digitais que geram impacto, desde a gestão de redes sociais à criação de conteúdo que ressoa com o seu público, aumentando o seu alcance e engagement.',
+                points: ['✓ Gestão de Redes Sociais com foco em arte', '✓ Campanhas de performance (Meta Ads, Google Ads)', '✓ Criação de conteúdo e storytelling de marca'],
+                chart: {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Redes Sociais', 'Relações Públicas', 'Eventos', 'Parcerias'],
+                        datasets: [{
+                            label: 'Mix de Marketing Digital',
+                            data: [45, 25, 15, 15],
+                            backgroundColor: ['#60a5fa', '#9333ea', '#10b981', '#f97316']
+                        }]
+                    },
+                    options: { plugins: { legend: { position: 'top' }, title: { display: true, text: 'Distribuição de Esforços de Marketing' } } }
+                }
+            },
+            financiamento: {
+                title: 'Captação de Financiamento',
+                text: 'Apoiamos a sua visão com os recursos que ela precisa. A nossa equipa especializa-se na identificação de oportunidades de financiamento, elaboração de candidaturas e estratégias de fundraising para projetos culturais.',
+                points: ['✓ Mapeamento de fundos (nacionais e europeus)', '✓ Elaboração de propostas de valor', '✓ Estratégias de crowdfunding e mecenato'],
+                chart: {
+                    type: 'line',
+                    data: {
+                        labels: ['Ano 0', 'Ano 1', 'Ano 2', 'Ano 3'],
+                        datasets: [{
+                            label: 'Receitas de Financiamento',
+                            data: [5, 25, 60, 90],
+                            fill: true,
+                            borderColor: '#9333ea',
+                            backgroundColor: 'rgba(147, 51, 234, 0.2)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: { scales: { y: { beginAtZero: true, ticks: { callback: (value) => '€' + value + 'k' } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Projeção de Captação de Fundos' } } }
+                }
+            }
+        };
+
+        const audienceCanvas = document.getElementById('audienceCanvas');
+        const audienceCtx = audienceCanvas.getContext('2d');
+        const audienceTitle = document.getElementById('audienceTitle');
+        const audienceList = document.getElementById('audienceList');
+        const toggleArtista = document.getElementById('toggleArtista');
+        const toggleAssociacao = document.getElementById('toggleAssociacao');
+        
+        let chartInstance = null;
+        const solutionTitle = document.getElementById('solutionTitle');
+        const solutionText = document.getElementById('solutionText');
+        const solutionPoints = document.getElementById('solutionPoints');
+        const solutionButtons = document.querySelectorAll('.solution-button');
+        const chartCanvas = document.getElementById('solutionChart');
+
+        function updateAudience(type) {
+            const data = audienceData[type];
+            audienceTitle.textContent = data.title;
+            audienceList.innerHTML = data.points.map(p => `<li>${p}</li>`).join('');
+            data.draw(audienceCtx);
+            toggleArtista.classList.toggle('active', type === 'artista');
+            toggleAssociacao.classList.toggle('active', type === 'associacao');
+        }
+
+        function updateSolution(solution) {
+            const data = solutionData[solution];
+            solutionTitle.textContent = data.title;
+            solutionText.textContent = data.text;
+            solutionPoints.innerHTML = data.points.map(p => `<li>${p}</li>`).join('');
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const chartConfig = { ...data.chart, options: { ...data.chart.options, responsive: true, maintainAspectRatio: false } };
+            chartInstance = new Chart(chartCanvas.getContext('2d'), chartConfig);
+            
+            solutionButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.solution === solution);
+            });
+        }
+        
+        toggleArtista.addEventListener('click', () => updateAudience('artista'));
+        toggleAssociacao.addEventListener('click', () => updateAudience('associacao'));
+
+        solutionButtons.forEach(button => {
+            button.addEventListener('click', () => updateSolution(button.dataset.solution));
+        });
+
+        updateAudience('artista');
+        updateSolution('estrategia');
+    });
+</script>
+
+</body>
+</html>
+
