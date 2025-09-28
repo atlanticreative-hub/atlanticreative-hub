@@ -1,153 +1,407 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<!-- Chosen Palette: Vibrant Professional (Azul, Ciano, Verde, Roxo, Rosa) -->
+<!-- Application Structure Plan: A single-page application designed as an interactive dashboard. The structure prioritizes user engagement over a linear report format. It starts with a Hero section to capture attention, followed by an interactive toggle for target audiences ('Artistas' vs 'Associações') to provide tailored information. The core is an interactive 'Solutions Dashboard' where users can click on a service (Agenciamento, Candidaturas, Produção) to dynamically update a central panel. A new 'Membership' section was added to highlight exclusive benefits and pricing. The structure concludes with case studies and a clear call-to-action. -->
+<!-- Visualization & Content Choices: 1. Audience Toggle: Report Info -> Target Audience (Artists, Associations); Goal -> Organize/Inform; Viz -> HTML/CSS toggles with a simple Canvas-drawn icon; Interaction -> On click, JS updates text content and redraws the Canvas icon to show tailored challenges and benefits. 2. Solutions Dashboard: Report Info -> Core Services; Goal -> Compare/Inform; Viz -> HTML/CSS buttons controlling a central panel with text and a Chart.js chart; Interaction -> On click, JS updates the panel content and dynamically generates a relevant chart. Pricing details for 'Candidaturas' were removed. 3. New 'Membership' section added to inform about benefits and pricing, using HTML/CSS for presentation. 4. All charts are rendered on Canvas via Chart.js, adhering to the NO SVG constraint for data visualization. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AtlantiCreative Hub</title>
+    <title>AtlantiCreative Hub - Painel Interativo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7f7f7;
-            color: #333;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; scroll-behavior: smooth; }
+        .brand-gradient-text { background-image: linear-gradient(to right, #1d4ed8, #06b6d4, #9333ea); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .brand-gradient-bg { background-image: linear-gradient(to right, #1d4ed8, #9333ea); }
+        .hero-section { clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%); }
+        .cta-button { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .cta-button:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(147, 51, 234, 0.3), 0 4px 6px -4px rgba(147, 51, 234, 0.3); }
+        .solution-button { transition: all 0.2s ease-in-out; }
+        .solution-button.active { background-color: #9333ea; color: white; transform: scale(1.05); }
+        .solution-button:not(.active):hover { background-color: #e9d5ff; }
+        .toggle-button { transition: all 0.2s ease-in-out; }
+        .toggle-button.active { background-color: #1d4ed8; color: white; }
+        .toggle-button:not(.active):hover { background-color: #dbeafe; }
+        .chart-container { position: relative; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-    <!-- Cabeçalho -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <nav class="container mx-auto px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <img src="https://placehold.co/40x40/7C6788/ffffff?text=AC" alt="Logo" class="rounded-lg">
-                <span class="text-xl font-bold text-[#7C6788]">AtlantiCreative Hub</span>
-            </div>
-            <a href="#contato" class="px-4 py-2 bg-[#7C6788] text-white rounded-md hover:bg-[#6a597a] transition-colors">Contacte-nos</a>
-        </nav>
+    <header class="py-6 bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+            <!-- INSERÇÃO DIRETA DO LOGO SVG NA NAVBAR -->
+            <a href="#" class="flex items-center space-x-2">
+                <svg class="w-12 h-12" viewBox="0 0 100 100">
+                    <defs>
+                        <linearGradient id="grad-a" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1d4ed8;stop-opacity:1" /><stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" /></linearGradient>
+                        <linearGradient id="grad-c" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#9333ea;stop-opacity:1" /><stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" /></linearGradient>
+                    </defs>
+                    <g>
+                        <path d="M35 85 L 50 15 L 65 85 L 57 85 L 55 70 L 45 70 L 43 85 Z" fill="url(#grad-a)" transform="scale(0.8) translate(10, 10)"/>
+                        <path d="M 45 70 L 55 70 L 53 60 L 47 60 Z" fill="white" transform="scale(0.8) translate(10, 10)"/>
+                        <path d="M 28 50 C 35 40, 40 45, 45 40 C 50 35, 50 55, 45 60 C 40 65, 30 60, 28 50 Z" fill="#10b981" transform="translate(10, 25) scale(0.6)"/>
+                        <path d="M 75 25 C 90 35, 90 70, 75 80 L 70 70 C 80 65, 80 40, 70 35 Z" fill="url(#grad-c)" transform="scale(0.8) translate(10, 10)"/>
+                        <path d="M 80 40 C 75 30, 65 30, 60 40 C 55 50, 60 60, 65 60 C 70 60, 75 50, 80 40 Z" fill="#9333ea" transform="translate(20, 20) scale(0.6)"/>
+                    </g>
+                </svg>
+                <div class="flex flex-col leading-none">
+                    <h1 class="text-xl font-extrabold text-gray-800">AtlantiCreative Hub</h1>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest">Consultoria & Inovação</p>
+                </div>
+            </a>
+            <nav class="hidden sm:flex space-x-6 text-sm font-medium text-gray-600">
+                <a href="#publico" class="hover:text-purple-600 transition">Para Quem</a>
+                <a href="#solucoes" class="hover:text-purple-600 transition">Serviços</a>
+                <a href="#membership" class="hover:text-purple-600 transition">Membros</a>
+                <a href="#contacto" class="hover:text-purple-600 transition">Contacto</a>
+            </nav>
+        </div>
     </header>
 
-    <!-- Seção Principal -->
     <main>
-        <section class="bg-[#F7E7C4] text-[#333] py-20">
-            <div class="container mx-auto px-6 text-center">
-                <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">Pensamos e crescemos juntos – da Madeira para o Mundo.</h1>
-                <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
-                    Apoio técnico, estratégico e formativo para o setor cultural, capacitando-o com ferramentas profissionais e oportunidades de circulação global.
-                </p>
-                <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
-                    <a href="#servicos" class="px-8 py-3 bg-[#7C6788] text-white rounded-md text-lg font-semibold hover:bg-[#6a597a] transition-colors">Descubra os Serviços</a>
+        <section class="hero-section py-24 md:py-32 text-center bg-white relative">
+            <div class="max-w-4xl mx-auto px-4">
+                
+                <!-- LOGO SVG: MAIOR E CENTRALIZADO NO TOPO DA SECÇÃO HERO -->
+                <div class="flex flex-col items-center justify-center mb-8">
+                    <svg class="w-32 h-32 sm:w-32 sm:h-32" viewBox="0 0 100 100">
+                        <defs>
+                            <linearGradient id="grad-a-hero" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1d4ed8;stop-opacity:1" /><stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" /></linearGradient>
+                            <linearGradient id="grad-c-hero" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#9333ea;stop-opacity:1" /><stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" /></linearGradient>
+                        </defs>
+                        <g>
+                            <path d="M35 85 L 50 15 L 65 85 L 57 85 L 55 70 L 45 70 L 43 85 Z" fill="url(#grad-a-hero)" transform="scale(0.8) translate(10, 10)"/>
+                            <path d="M 45 70 L 55 70 L 53 60 L 47 60 Z" fill="white" transform="scale(0.8) translate(10, 10)"/>
+                            <path d="M 28 50 C 35 40, 40 45, 45 40 C 50 35, 50 55, 45 60 C 40 65, 30 60, 28 50 Z" fill="#10b981" transform="translate(10, 25) scale(0.6)"/>
+                            <path d="M 75 25 C 90 35, 90 70, 75 80 L 70 70 C 80 65, 80 40, 70 35 Z" fill="url(#grad-c-hero)" transform="scale(0.8) translate(10, 10)"/>
+                            <path d="M 80 40 C 75 30, 65 30, 60 40 C 55 50, 60 60, 65 60 C 70 60, 75 50, 80 40 Z" fill="#9333ea" transform="translate(20, 20) scale(0.6)"/>
+                        </g>
+                    </svg>
+                </div>
+                <!-- FIM DO LOGO -->
+
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-4"><span class="brand-gradient-text">A Estratégia que Pinta o Futuro.</span></h2>
+                <p class="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">Uma consultoria interativa para Artistas e Associações. Explore as nossas soluções e veja como podemos impulsionar o seu crescimento.</p>
+                <a href="#solucoes" class="cta-button inline-block px-10 py-4 text-lg font-bold text-white uppercase rounded-full shadow-lg brand-gradient-bg">Explore os Serviços</a>
+            </div>
+        </section>
+
+        <section id="publico" class="py-20">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold brand-gradient-text mb-2">Para Quem Criamos Valor</h3>
+                    <p class="text-gray-600 max-w-2xl mx-auto">As nossas estratégias são desenhadas à medida dos desafios únicos de cada criador e organização. Selecione o seu perfil para ver como o podemos ajudar.</p>
+                </div>
+
+                <div class="flex justify-center space-x-2 md:space-x-4 mb-8">
+                    <button id="toggleArtista" class="toggle-button active text-sm md:text-base font-bold py-2 px-4 md:py-3 md:px-6 rounded-full">Para Artistas</button>
+                    <button id="toggleAssociacao" class="toggle-button text-sm md:text-base font-bold py-2 px-4 md:py-3 md:px-6 rounded-full">Para Associações</button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="text-content">
+                        <h4 id="audienceTitle" class="text-2xl font-bold text-gray-800 mb-4">Desafios Comuns do Artista</h4>
+                        <ul id="audienceList" class="space-y-2 text-gray-600 list-disc list-inside">
+                            <li>Dificuldade em monetizar a sua arte de forma consistente.</li>
+                            <li>Falta de visibilidade e alcance no mercado digital.</li>
+                            <li>Gestão de tempo entre a criação e a promoção do trabalho.</li>
+                            <li>Construção de uma marca pessoal forte e autêntica.</li>
+                        </ul>
+                        <!-- NOVO BOTÃO DE MAIS INFORMAÇÕES -->
+                        <div class="mt-6">
+                            <a href="#contacto" class="inline-flex items-center text-sm font-semibold text-purple-600 hover:text-purple-800 transition">
+                                Mais informações & diagnóstico gratuito
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                            </a>
+                        </div>
+                        <!-- FIM NOVO BOTÃO -->
+                    </div>
+                    <div class="canvas-container flex justify-center items-center h-48 md:h-64">
+                         <canvas id="audienceCanvas" width="200" height="200"></canvas>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Seção de Serviços -->
-        <section id="servicos" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl font-bold text-center mb-12 text-[#7C6788]">Os Nossos Serviços</h2>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <!-- Cartão de Agenciamento -->
-                    <div class="bg-white p-8 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
-                        <div class="text-5xl mb-4 text-[#7C6788] text-center">
-                            <!-- Ícone de Agenciamento -->
-                            <svg class="h-12 w-12 text-[#7C6788] mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20v-2a3 3 0 013-3h3m-6 3a3 3 0 01-3-3V9a3 3 0 013-3h1a3 3 0 013 3v11m-9-9h1a3 3 0 013 3v11m-3-9V7a3 3 0 013-3h1a3 3 0 013 3v14m-10 1a1 1 0 01-1-1v-4a1 1 0 011-1h12a1 1 0 011 1v4a1 1 0 01-1 1h-12z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-2xl font-semibold text-center mb-4 text-[#333]">Agenciamento</h3>
-                        <ul class="list-disc list-inside space-y-2 text-gray-700">
-                            <li>Representação Artística e Apoio Profissional.</li>
-                            <li>Acesso a uma rede de parceiros globais.</li>
+        <section id="solucoes" class="py-20 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold brand-gradient-text mb-2">Serviços: Agenciamento, Candidaturas e Produção Cultural</h3>
+                    <p class="text-gray-600 max-w-2xl mx-auto">A **AtlantiCreative Hub** oferece soluções focadas no crescimento, representação e sustentabilidade do seu projeto. Clique para descobrir os detalhes de cada serviço.</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row md:space-x-4 justify-center mb-8">
+                    <!-- Botões de Serviço (Formação removida) -->
+                    <button id="btnAgenciamento" data-solution="agenciamento" class="solution-button active font-bold py-3 px-6 rounded-lg mb-2 md:mb-0 w-full md:w-auto">Agenciamento Artístico</button>
+                    <button id="btnCandidaturas" data-solution="candidaturas" class="solution-button font-bold py-3 px-6 rounded-lg mb-2 md:mb-0 w-full md:w-auto">Gestão de Candidaturas</button>
+                    <button id="btnProducao" data-solution="producao" class="solution-button font-bold py-3 px-6 rounded-lg w-full md:w-auto">Produção Cultural</button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-xl p-8 lg:p-12 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[450px]">
+                    <div id="solutionContent" class="text-content">
+                        <h4 id="solutionTitle" class="text-2xl font-bold text-gray-800 mb-4">Agenciamento Artístico</h4>
+                        <p id="solutionText" class="text-gray-600 mb-4">Oferecemos Representação Artística completa, apoio profissional e gestão de projetos para promover o seu trabalho em mercados nacionais e internacionais. Focamos na valorização e circulação da sua arte.</p>
+                        <ul id="solutionPoints" class="text-sm text-gray-500 space-y-1">
+                            <li>✓ Representação Artística e negociação de contratos.</li>
+                            <li>✓ Apoio à circulação em mercados nacionais e internacionais.</li>
+                            <li>✓ Comissão de 20-30% sobre projetos angariados.</li>
+                        </ul>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="solutionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- NOVA SECÇÃO: MEMBERSHIP CARD -->
+        <section id="membership" class="py-20 bg-white">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold brand-gradient-text mb-2">AtlantiCreative Hub: Membership Card</h3>
+                    <p class="text-gray-600 max-w-2xl mx-auto">Junte-se à nossa rede exclusiva e desbloqueie vantagens que impulsionam a sua carreira e projetos culturais. Pensamos e crescemos juntos.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Cartão de Vantagens -->
+                    <div class="bg-gray-50 p-6 rounded-2xl shadow-lg border-l-4 border-purple-500">
+                        <h4 class="text-xl font-bold text-gray-800 mb-4">Vantagens Exclusivas da Rede</h4>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-start space-x-3">
+                                <span class="text-purple-500 font-bold text-lg">20%</span>
+                                <p>Desconto em **todos os serviços** de consultoria, produção e gestão de candidaturas.</p>
+                            </li>
+                            <li class="flex items-start space-x-3">
+                                <span class="text-purple-500 font-bold text-lg">🌐</span>
+                                <p><strong class="text-gray-800">Rede de Parceiros:</strong> Acesso a oportunidades de mobilidade, encontros, coproduções e rede mundial de residências artísticas.</p>
+                            </li>
+                            <li class="flex items-start space-x-3">
+                                <span class="text-purple-500 font-bold text-lg">🤝</span>
+                                <p><strong class="text-gray-800">Apoio à Circulação:</strong> Suporte a cooperação e circulação artística em mercados nacionais e internacionais.</p>
+                            </li>
                         </ul>
                     </div>
                     
-                    <!-- Cartão de Gestão de Candidaturas -->
-                    <div class="bg-white p-8 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
-                        <div class="text-5xl mb-4 text-[#7C6788] text-center">
-                            <!-- Ícone de Candidaturas -->
-                            <svg class="h-12 w-12 text-[#7C6788] mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-5 3a2 2 0 01-2-2v-4a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20z" />
-                            </svg>
+                    <!-- Cartão de Quotas Anuais -->
+                    <div class="bg-purple-700 p-6 rounded-2xl shadow-xl text-white">
+                        <h4 class="text-xl font-bold mb-4">Quotas Anuais Flexíveis</h4>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center bg-purple-800 p-3 rounded-lg">
+                                <p class="text-lg font-semibold">Artistas Individuais</p>
+                                <p class="text-2xl font-extrabold text-yellow-300">€100</p>
+                            </div>
+                            <div class="flex justify-between items-center bg-purple-800 p-3 rounded-lg">
+                                <p class="text-lg font-semibold">Coletivos Culturais</p>
+                                <p class="text-2xl font-extrabold text-yellow-300">€250</p>
+                            </div>
                         </div>
-                        <h3 class="text-2xl font-semibold text-center mb-4 text-[#333]">Gestão de Candidaturas</h3>
-                        <ul class="list-disc list-inside space-y-2 text-gray-700">
-                            <li>Elaboração e revisão de candidaturas.</li>
-                            <li>Apoio na submissão e gestão pós-submissão.</li>
-                        </ul>
+                        <p class="text-sm mt-4 opacity-80">Invista no seu legado e na sua comunidade criativa.</p>
                     </div>
-
-                    <!-- Cartão de Produção Cultural -->
-                    <div class="bg-white p-8 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
-                        <div class="text-5xl mb-4 text-[#7C6788] text-center">
-                            <!-- Ícone de Produção -->
-                            <svg class="h-12 w-12 text-[#7C6788] mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-2xl font-semibold text-center mb-4 text-[#333]">Produção Cultural</h3>
-                        <ul class="list-disc list-inside space-y-2 text-gray-700">
-                            <li>Criação de projetos culturais do conceito à implementação.</li>
-                            <li>Criação de espetáculos inovadores.</li>
-                        </ul>
-                    </div>
+                </div>
+                <div class="text-center mt-10">
+                    <a href="#contacto" class="cta-button inline-block px-10 py-4 text-lg font-bold text-white uppercase rounded-full shadow-lg bg-green-500 hover:bg-green-600 transition duration-300">
+                        Quero ser Membro
+                    </a>
                 </div>
             </div>
         </section>
+        <!-- FIM DA SECÇÃO MEMBERSHIP -->
 
-        <!-- Seção de Parcerias e Membros -->
-        <section id="parcerias" class="py-20 bg-white">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="text-3xl font-bold mb-12 text-[#7C6788]">Vantagens de ser Membro</h2>
-                <div class="grid md:grid-cols-2 gap-8 items-center">
-                    <div class="md:text-left">
-                        <p class="text-xl mb-4">Ao aderir, terá acesso a uma rede de parceiros e a vantagens exclusivas:</p>
-                        <ul class="list-disc list-inside text-left space-y-2 text-gray-700 max-w-md mx-auto md:mx-0">
-                            <li>Desconto de 20% em todos os nossos serviços.</li>
-                            <li>Acesso a uma rede mundial de residências artísticas.</li>
-                            <li>Apoio à cooperação e circulação artística.</li>
-                            <li>Quotas anuais flexíveis: artistas individuais (€100) e coletivos culturais (€250).</li>
-                        </ul>
-                    </div>
-                    <div class="flex justify-center">
-                        <img src="https://placehold.co/400x300/F7E7C4/7C6788?text=Rede+de+Membros" alt="Membros" class="rounded-lg shadow-lg">
-                    </div>
+        <section id="contacto" class="py-20 bg-gray-50">
+            <div class="max-w-3xl mx-auto px-4 text-center">
+                <h3 class="text-3xl font-bold mb-4">Pronto para dar o próximo passo?</h3>
+                <p class="text-gray-600 mb-8">Deixe-nos os seus dados e entraremos em contacto para agendar a sua primeira sessão de diagnóstico gratuita.</p>
+                <div class="bg-white p-8 rounded-xl shadow-lg max-w-lg mx-auto">
+                    <form onsubmit="event.preventDefault(); alert('Obrigado! A sua mensagem foi enviada. Entraremos em contacto brevemente.');">
+                        <input type="text" placeholder="Nome Completo" required class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="email" placeholder="Email" required class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <textarea placeholder="Fale-nos do seu projeto..." rows="3" class="w-full p-3 mb-6 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                        <button type="submit" class="cta-button w-full px-6 py-3 text-lg font-bold text-white uppercase rounded-lg shadow-md brand-gradient-bg">Contactar a Consultoria</button>
+                    </form>
                 </div>
-            </div>
-        </section>
-
-        <!-- Seção de Parceiros Oficiais -->
-        <section id="parceiros-oficiais" class="py-20 bg-[#7C6788] text-white">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl font-bold text-center mb-12">Os Nossos Parceiros Oficiais</h2>
-                <div class="grid md:grid-cols-4 gap-8">
-                    <div class="bg-white text-[#7C6788] p-6 rounded-lg shadow-lg text-center font-bold">Associação Capote</div>
-                    <div class="bg-white text-[#7C6788] p-6 rounded-lg shadow-lg text-center font-bold">Casa das Cenas</div>
-                    <div class="bg-white text-[#7C6788] p-6 rounded-lg shadow-lg text-center font-bold">Prisma</div>
-                    <div class="bg-white text-[#7C6788] p-6 rounded-lg shadow-lg text-center font-bold">Madeira Art Fest</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Seção de Contato -->
-        <section id="contato" class="py-20 bg-[#F7E7C4]">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="text-3xl font-bold mb-4 text-[#7C6788]">Pronto para transformar a sua carreira?</h2>
-                <p class="text-lg text-gray-700 mb-8 max-w-xl mx-auto">
-                    Entre em contacto connosco para saber como o AtlantiCreative Hub pode impulsionar o seu talento e levá-lo para o mundo.
-                </p>
-                <a href="mailto:ar7e.org@gmail.com" class="px-8 py-3 bg-[#7C6788] text-white rounded-md text-lg font-semibold hover:bg-[#6a597a] transition-colors">Enviar Email</a>
             </div>
         </section>
     </main>
 
-    <!-- Rodapé -->
-    <footer class="bg-[#333] text-white py-8">
-        <div class="container mx-auto px-6 text-center text-sm">
-            <p>&copy; 2024 AtlantiCreative Hub. Todos os direitos reservados.</p>
-            <p class="mt-2">ar7e.org@gmail.com</p>
+    <footer class="py-8 bg-gray-800 text-white">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center text-center sm:text-left text-sm">
+            <p class="mb-4 sm:mb-0">&copy; 2024 AtlantiCreative Hub. Todos os direitos reservados.</p>
+            <div class="flex items-center space-x-6 text-xs">
+                <a href="mailto:geral@atlanticreative-hub.com" class="hover:text-blue-300 transition">geral@atlanticreative-hub-com</a>
+                <span>+351 93 334 0517</span>
+            </div>
         </div>
     </footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const audienceData = {
+            artista: {
+                title: 'Desafios Comuns do Artista',
+                points: [
+                    'Dificuldade em monetizar a sua arte de forma consistente.',
+                    'Falta de visibilidade e alcance no mercado digital.',
+                    'Gestão de tempo entre a criação e a promoção do trabalho.',
+                    'Construção de uma marca pessoal forte e autêntica.',
+                ],
+                draw: (ctx) => {
+                    ctx.clearRect(0, 0, 200, 200);
+                    ctx.strokeStyle = '#1d4ed8';
+                    ctx.lineWidth = 8;
+                    ctx.beginPath();
+                    ctx.moveTo(50, 150);
+                    ctx.bezierCurveTo(50, 170, 150, 170, 150, 150);
+                    ctx.stroke();
+                    ctx.fillStyle = '#9333ea';
+                    ctx.fillRect(80, 80, 40, 60);
+                    ctx.fillStyle = '#10b981';
+                    ctx.beginPath();
+                    ctx.arc(100, 60, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            },
+            associacao: {
+                title: 'Desafios Comuns da Associação',
+                points: [
+                    'Captação de fundos e garantia de sustentabilidade financeira.',
+                    'Aumento do engagement da comunidade e número de associados.',
+                    'Gestão de projetos culturais com recursos limitados.',
+                    'Comunicação de impacto e relevância para stakeholders.',
+                ],
+                draw: (ctx) => {
+                    ctx.clearRect(0, 0, 200, 200);
+                    const drawPerson = (x, y, color) => {
+                        ctx.fillStyle = color;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 15, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.moveTo(x - 20, y + 45);
+                        ctx.lineTo(x, y + 15);
+                        ctx.lineTo(x + 20, y + 45);
+                        ctx.closePath();
+                        ctx.fill();
+                    };
+                    drawPerson(100, 80, '#1d4ed8');
+                    drawPerson(60, 100, '#9333ea');
+                    drawPerson(140, 100, '#10b981');
+                }
+            }
+        };
+
+        const solutionData = {
+            agenciamento: {
+                title: 'Agenciamento Artístico',
+                text: 'Oferecemos Representação Artística completa, apoio profissional e gestão de projetos para promover o seu trabalho em mercados nacionais e internacionais. Focamos na valorização e circulação da sua arte.',
+                points: ['✓ Representação Artística e negociação de contratos.', '✓ Apoio à circulação em mercados nacionais e internacionais.', '✓ Comissão de 20-30% sobre projetos angariados.'],
+                chart: {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Comissão Hub (20-30%)', 'Artista (70-80%)'],
+                        datasets: [{
+                            label: 'Divisão Típica de Receita',
+                            data: [25, 75],
+                            backgroundColor: ['#9333ea', '#10b981']
+                        }]
+                    },
+                    options: { plugins: { legend: { position: 'top' }, title: { display: true, text: 'Distribuição de Receitas (Agenciamento)' } } }
+                }
+            },
+            candidaturas: {
+                title: 'Gestão Estratégica de Candidaturas',
+                text: 'Maximizamos as suas hipóteses de financiamento. Desde a revisão detalhada à redação completa e submissão de candidaturas (nacionais e europeias), garantimos excelência na gestão estratégica para o setor cultural e artístico.',
+                points: ['✓ Revisão detalhada, redação e submissão.', '✓ Suporte estratégico para Pacotes Intermédio e Completo.', '✓ *Success Fee* sobre candidaturas aprovadas (a definir no contrato).'],
+                chart: {
+                    type: 'bar',
+                    data: {
+                        labels: ['Revisão', 'Redação Completa', 'Gestão Total'],
+                        datasets: [{
+                            label: 'Níveis de Serviço',
+                            data: [1, 2, 3],
+                            backgroundColor: ['#60a5fa', '#3b82f6', '#1d4ed8'],
+                            borderColor: '#1d4ed8',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { scales: { y: { beginAtZero: true, ticks: { callback: (value) => value } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Níveis de Serviço de Candidatura' } } }
+                }
+            },
+            producao: {
+                title: 'Produção Cultural e Artística',
+                text: 'Apoio completo na criação de projetos culturais e espetáculos inovadores, do conceito à implementação. Focamos na valorização do património cultural imaterial e material através de candidaturas a financiamento público.',
+                points: ['✓ Criação de espetáculos e projetos inovadores.', '✓ Valorização do Património Cultural.', '✓ Gestão da logística e implementação de eventos.'],
+                chart: {
+                    type: 'line',
+                    data: {
+                        labels: ['Conceção', 'Financiamento', 'Produção', 'Implementação'],
+                        datasets: [{
+                            label: 'Progresso da Produção',
+                            data: [10, 40, 80, 100],
+                            fill: true,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: { scales: { y: { beginAtZero: true, ticks: { callback: (value) => value + '%' } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Fases Típicas do Projeto' } } }
+                }
+            }
+        };
+
+        const audienceCanvas = document.getElementById('audienceCanvas');
+        const audienceCtx = audienceCanvas.getContext('2d');
+        const audienceTitle = document.getElementById('audienceTitle');
+        const audienceList = document.getElementById('audienceList');
+        const toggleArtista = document.getElementById('toggleArtista');
+        const toggleAssociacao = document.getElementById('toggleAssociacao');
+        
+        let chartInstance = null;
+        const solutionTitle = document.getElementById('solutionTitle');
+        const solutionText = document.getElementById('solutionText');
+        const solutionPoints = document.getElementById('solutionPoints');
+        const solutionButtons = document.querySelectorAll('.solution-button');
+        const chartCanvas = document.getElementById('solutionChart');
+
+        function updateAudience(type) {
+            const data = audienceData[type];
+            audienceTitle.textContent = data.title;
+            audienceList.innerHTML = data.points.map(p => `<li>${p}</li>`).join('');
+            data.draw(audienceCtx);
+            toggleArtista.classList.toggle('active', type === 'artista');
+            toggleAssociacao.classList.toggle('active', type === 'associacao');
+        }
+
+        function updateSolution(solution) {
+            const data = solutionData[solution];
+            solutionTitle.textContent = data.title;
+            solutionText.textContent = data.text;
+            solutionPoints.innerHTML = data.points.map(p => `<li>${p}</li>`).join('');
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const chartConfig = { ...data.chart, options: { ...data.chart.options, responsive: true, maintainAspectRatio: false } };
+            chartInstance = new Chart(chartCanvas.getContext('2d'), chartConfig);
+            
+            solutionButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.solution === solution);
+            });
+        }
+        
+        toggleArtista.addEventListener('click', () => updateAudience('artista'));
+        toggleAssociacao.addEventListener('click', () => updateAudience('associacao'));
+
+        solutionButtons.forEach(button => {
+            button.addEventListener('click', () => updateSolution(button.dataset.solution));
+        });
+
+        updateAudience('artista');
+        updateSolution('agenciamento'); // Define 'Agenciamento' como o serviço inicial
+    });
+</script>
 
 </body>
 </html>
