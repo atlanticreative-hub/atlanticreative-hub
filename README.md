@@ -29,6 +29,20 @@
 </head>
 <body class="antialiased">
 
+    <svg style="display: none;">
+        <defs>
+            <linearGradient id="grad-a" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1d4ed8;stop-opacity:1" /><stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" /></linearGradient>
+            <linearGradient id="grad-c" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#9333ea;stop-opacity:1" /><stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" /></linearGradient>
+            <g id="ac-logo">
+                <path d="M35 85 L 50 15 L 65 85 L 57 85 L 55 70 L 45 70 L 43 85 Z" fill="url(#grad-a)" transform="scale(0.8) translate(10, 10)"/>
+                <path d="M 45 70 L 55 70 L 53 60 L 47 60 Z" fill="white" transform="scale(0.8) translate(10, 10)"/>
+                <path d="M 28 50 C 35 40, 40 45, 45 40 C 50 35, 50 55, 45 60 C 40 65, 30 60, 28 50 Z" fill="#10b981" transform="translate(10, 25) scale(0.6)"/>
+                <path d="M 75 25 C 90 35, 90 70, 75 80 L 70 70 C 80 65, 80 40, 70 35 Z" fill="url(#grad-c)" transform="scale(0.8) translate(10, 10)"/>
+                <path d="M 80 40 C 75 30, 65 30, 60 40 C 55 50, 60 60, 65 60 C 70 60, 75 50, 80 40 Z" fill="#9333ea" transform="translate(20, 20) scale(0.6)"/>
+            </g>
+        </defs>
+    </svg>
+
     <header class="py-6 bg-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
             <!-- INSERÇÃO DIRETA DO LOGO SVG NA NAVBAR -->
@@ -82,7 +96,10 @@
                 </div>
                 <!-- FIM DO LOGO -->
 
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-4"><span class="brand-gradient-text">A Estratégia que Pinta o Futuro.</span></h2>
+                <!-- TÍTULO ALTERADO -->
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+                    <span class="brand-gradient-text">Somos catalizadores de sonhos.</span>
+                </h2>
                 <p class="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">Uma consultoria interativa para Artistas e Associações. Explore as nossas soluções e veja como podemos impulsionar o seu crescimento.</p>
                 <a href="#solucoes" class="cta-button inline-block px-10 py-4 text-lg font-bold text-white uppercase rounded-full shadow-lg brand-gradient-bg">Explore os Serviços</a>
             </div>
